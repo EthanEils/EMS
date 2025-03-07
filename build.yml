@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  DOTNET_VERSION: "9.x"
+
+jobs:
+  build:
+    run-on: ubuntu-latest
+
+    defualts:
+      run:
+        working-directory: EMS
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore EMS.sln
+
+      - name: Build
+        run: dotnet build EMS.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test EMS.sln --configuration Release --no-build --no-restore
+
+      - name: Publish
+        run: dotnet publish EMS.sln --configuration Release --no-build --no-restore
