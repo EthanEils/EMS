@@ -14,19 +14,19 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
-COPY ["EMS.Api/EMS.Api.csproj", "EMS.Api/"]
-RUN dotnet restore "./EMS.Api/EMS.Api.csproj"
+COPY ["EMS.Web/EMS.Web.csproj", "EMS.Web/"]
+RUN dotnet restore "./EMS.Web/EMS.Web.csproj"
 COPY . .
-WORKDIR "/src/EMS.Api"
-RUN dotnet build "./EMS.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/EMS.Web"
+RUN dotnet build "./EMS.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./EMS.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./EMS.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "EMS.Api.dll"]
+ENTRYPOINT ["dotnet", "EMS.Web.dll"]
